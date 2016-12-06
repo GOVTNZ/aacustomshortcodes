@@ -1,0 +1,17 @@
+{
+	"name": "GOVTNZ/aacustomshortcodes",
+	"description": "A drop-in replacement for shortcode parser, providing nested shortcodes",
+	"type": "silverstripe-module",
+	"homepage": "http://github.com/GOVTNZ/aacustomshortcodes",
+	"keywords": ["silverstripe", "shortcodes"],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Mark Stephens",
+			"email": "mr.morphic@gmail.com"
+		}
+	],
+	"require": {
+		"silverstripe/framework": "*"
+	}
+}
