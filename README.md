@@ -22,6 +22,21 @@ references to the ShortcodeParser. The CMS module, for example, registers shortc
 are processed in alphabetical order, this needs to be very order, otherwise the dependency injector will
 fail to substitute the old parser for the new one.
 
+You can configure shortcodes as you currently do:
+
+	$parser = ShortcodeParser::get('default');
+	$parser->register('myoldshortcode', array('SomeClass', 'handler'));
+
+Or you can register with additional metadata:
+
+	$parser->register('mynewshortcode', array('SomeClass', 'handler'), array(
+		'expectedResult' => 'block',
+		'hasStartAndEnd' => true
+	));
+
+You need to set hasStartAndEnd to true for the parser to understand that it expects the shortcode
+has an end tag, and will support nesting.
+
 # Implementation
 
 The implementation is a subclass of ShortcodeParser, but provides it's own implementations of all
