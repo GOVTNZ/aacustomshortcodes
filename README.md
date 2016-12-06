@@ -8,6 +8,20 @@ a revised implementation for a future SilverStripe release, subject to review an
 As such, the replacement implementation is completely self contained, except where
 framework unit tests wouldn't work.
 
+It is also designed to be a drop-in replacement for the standard parser and to be backward compatible with
+existing framework and CMS shortcodes, and other shortcodes you may have. You can get additional
+behaviours by augmenting the shortcode registration. It uses identical regexes for detecting shortcodes in
+text and attributes, and passes all framework short code tests.
+
+This has been tested on SilverStripe 3.2.3.
+
+# Installation
+
+You can use composer to include this module. One caveat is that the name of the module must occur before any
+references to the ShortcodeParser. The CMS module, for example, registers shortcodes. Because modules
+are processed in alphabetical order, this needs to be very order, otherwise the dependency injector will
+fail to substitute the old parser for the new one.
+
 # Implementation
 
 The implementation is a subclass of ShortcodeParser, but provides it's own implementations of all
@@ -27,11 +41,15 @@ The new implementation has two general behaviours in addition to the current imp
 ## Special cases
 
 Shortcodes can be entered as text in a rich text field. TinyMCE does not understand this, and will
-always wrap the shortcode with a <p>...</p>. This would be correct if the shortcode substitution
+always wrap the shortcode with a
+
+	<p>...</p>
+
+This would be correct if the shortcode substitution
 returns an inline element, but is not correct if the shortcode substitution is a block element, as
 block elements cannot be nested in a paragraph. To work around this, when a shortcode is registered,
 the extra options can be used to tell the shortcode parser that an element is expected to return
-a block element. If this is the case, it will automatically remove the <p>...</p> wrapper.
+a block element. If this is the case, it will automatically remove the wrapper.
 
 Additionally, to support the parsing of nested shortcodes, the extra options on shortcode registration
 can tell the parser that a shortcode expects to have a start and end. This is required for the parser
