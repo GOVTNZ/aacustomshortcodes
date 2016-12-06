@@ -261,10 +261,6 @@ if (self::$debugging) Debug::show('tag is ' . print_r($orderedTag, true));
 				continue;
 			}
 
-			// if ($orderedTag['index'] != $shortcodeNode->getAttribute('data-tagid'))
-			// {
-			// 	throw new Exception('WTF?');
-			// }
 			$tag = $tags[$shortcodeNode->getAttribute('data-tagid')];
 			$parent = $this->getParent($shortcodeNode);
 			$parents[] = $parent;
@@ -443,6 +439,7 @@ if (self::$debugging) Debug::show('extract tags step 1:' . print_r($tags, true))
 		// those in attributes), generate a partially ordered list of tags deepest first, so that we can
 		// process it in order.
 		list($newContent, $orderedTags) = $this->generateDepthFirstOrderedTags($content, $tags);
+if (self::$debugging) Debug::show('extract tags step 2 tags:' . print_r($tags, true));
 if (self::$debugging) Debug::show('extract tags step 2 prior content:' . print_r($content, true));
 if (self::$debugging) Debug::show('extract tags step 2 new content:' . print_r($newContent, true));
 if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r($orderedTags, true));
@@ -451,6 +448,41 @@ if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r(
 			array_values($tags),
 			$orderedTags
 		);
+	}
+
+	/**
+	 * A helper function to assist with error handling. Given an error message, figure out what to do based
+	 * on self::$error_behaviour, as follows:
+	 * 	self::STRIP:		returns an empty string to substitute.
+	 * 	self::WARN:			returns the error message to substitute.
+	 *	self::LEAVE:		returns FALSE
+	 *	self::ERROR:		generates a user error with the message.
+	 *
+	 * @param string $error
+	 * @return mixed -  if a string is returned, it is for substituting.
+	 *					if FALSE is returned, it indicates the errornous shortcode should not be substituted.
+	 */
+	protected function handleError($error, &$tag) {
+		switch (self::$error_behavior) {
+			case self::STRIP:
+				$tag['markerTag'] = 'literal';
+				$tag['content'] = '';
+				break;
+
+			case self::WARN:
+				$tag['markerTag'] = 'literal';
+				$tag['content'] = '<strong class="warning">' . $error . '</strong>';
+				break;
+
+			case self::LEAVE:
+				$tag['markerTag'] = 'literal';
+				$tag['content'] = $tag['text'];
+				break;
+
+			case self::ERROR:
+				user_error($error, E_USER_ERROR);
+				break;
+		}
 	}
 
 	/**
@@ -470,11 +502,10 @@ if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r(
 	 *			- the modified content with shortcodes replaced, and secondly
 	 *			- the ordered list of tag openings
 	 */
-	protected function generateDepthFirstOrderedTags($content, $tags) {
+	protected function generateDepthFirstOrderedTags($content, &$tags) {
 		$result = array();
 		$orderedTags = array();
 		$stack = array();
-		$error = NULL;
 
 		// The approach is to iterate over the tags in order. For a shortcode that doesn't have an end,
 		// we just add it to the ordered list. For tags that have a start and end, we push the start on
@@ -500,17 +531,19 @@ if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r(
 				if (count($stack) == 0) {
 					// if an end tag appears by itself, it's an error unless it's not registered, where we'll ignore it.
 					if ($this->registered($tag['close'])) {
-						$error = "didn't expect close of " . $tag['close'];
+						$this->handleError("didn't expect close of " . $tag['close'], $tags[$i]); // $tags[$i] rather than $tag, because we change it.
+						$orderedTags[] = $tag;
 					}
-					break;
+				} else {
+					$stackTop = $stack[count($stack) - 1];
+					if ($stackTop['open'] != $tag['close']) {
+						$this->handleError("mismatching end shortcode, expected " . $stackTop['open'] . " but got " . $tag['close'], $tags[$i]);
+					} else {
+						// the close matches what's on the stack, so pop it off and add it to orderedtags.
+						$orderedTags[] = $stackTop;
+						array_pop($stack);
+					}
 				}
-				$stackTop = $stack[count($stack) - 1];
-				if ($stackTop['open'] != $tag['close']) {
-					$error = "mismatching end shortcode, expected " . $stackTop['open'] . " but got " . $tag['close'];
-					break;
-				}
-				$orderedTags[] = $stackTop;
-				array_pop($stack);
 			}
 		}
 
@@ -542,6 +575,10 @@ if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r(
 						   substr($content, $tag['e']);
 			} else if ($markerTag == 'notranslate') {
 				// leave it alone
+			} else if ($markerTag == 'literal') {
+					$content = substr($content, 0, $tag['s']) .
+							   $tag['content'] .
+							   substr($content, $tag['e']);
 			} else if ($tag['escaped']) {
 				// strip one set of [ and ]. Work out exactly the bits we want.
 				$start = $tag['s'];
@@ -575,10 +612,6 @@ if (self::$debugging) Debug::show('extract tags step 2 ordered tags:' . print_r(
 					}
 				}
 			}
-		}
-
-		if ($error) {
-			throw new Exception("Error parsing shortcodes: " . $error);
 		}
 
 		$result[] = $content;
