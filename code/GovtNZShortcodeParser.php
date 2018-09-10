@@ -235,6 +235,13 @@ class GovtNZShortcodeParser extends ShortcodeParser
     // and then delegates to the default parsing method to handle short codes.
     public function parse($content)
     {
+        // LH 20170227 If $content contains table elements <tr> or <td> within a <script> tag, we don't parse it.
+        // This avoids breaking static template fragments such as gridfieldextensions. The content we parse comes from
+        // TinyMCE, and TinyMCE doesn't permit fragments of this nature.
+        if ($this->contentIsFragment($content)) {
+            return $content;
+        }
+
         // Iterate over shortcodes with extra metadata, and apply any special case rules based on that metadata.
         foreach ($this->extraMetadata as $shortcode => $options) {
             switch ($options['expectedResult']) {
@@ -371,6 +378,41 @@ class GovtNZShortcodeParser extends ShortcodeParser
         );
 
         return $content;
+    }
+
+    /**
+     * @param $content
+     * @return bool
+     * Returns TRUE if the content contains table fragments within a script tag and without an enclosing table.
+     * Written specifically for gridfieldextensions' GridFieldAddNewInlineRow, but will work for other static template
+     * instances. This is a nasty hack, but we have two conflicting dynamics at work; the injection of script blocks
+     * into the page by modules such as gridfieldextensions, and the need to parse content for shortcodes. In loading
+     * content into a DOM and extracting it again, we lose orphaned table elements, which breaks template fragments
+     * that rely on this.
+     */
+    protected function contentIsFragment($content)
+    {
+        $pos = strpos($content, '<script');
+
+        if ($pos !== false) {
+            $content = substr($content, $pos);
+            $pos = strpos($content, '</script>');
+
+            if ($pos !== false) {
+                $content = substr($content, 0, $pos + 9);
+                $pos = strpos($content, '<table');
+
+                if ($pos === false) {
+                    $pos = strpos($content, '<tr') || strpos($content, '<td');
+
+                    if ($pos !== false) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
