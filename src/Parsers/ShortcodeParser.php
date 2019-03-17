@@ -2,7 +2,7 @@
 
 namespace GovtNZ\SilverStripe\Parsers;
 
-use SilverStripe\View\Parsers\ShortcodeParser;
+use SilverStripe\View\Parsers\ShortcodeParser as BaseParser;
 use SilverStripe\Dev\Debug;
 
 /**
@@ -13,7 +13,7 @@ use SilverStripe\Dev\Debug;
  * so puts <p> around them, and this parser will reduce them. It also
  * understands nested shortcodes.
  */
-class ShortcodeParser extends ShortcodeParser
+class ShortcodeParser extends BaseParser
 {
     public static $RESULT_TEXT = 'text';
 
