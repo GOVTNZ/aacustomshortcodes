@@ -2,7 +2,7 @@
 
 [![Build Status](http://img.shields.io/travis/govtnz/aacustomshortcodes.svg?style=flat-square)](http://travis-ci.org/govtnz/aacustomshortcodes)
 [![Version](http://img.shields.io/packagist/v/govtnz/aacustomshortcodes.svg?style=flat-square)](https://packagist.org/packages/govtnz/aacustomshortcodes)
-[![License](http://img.shields.io/packagist/l/govtnz/aacustomshortcodes.svg?style=flat-square)](LICENSE.md)
+[![License](http://img.shields.io/packagist/l/govtnz/aacustomshortcodes.svg?style=flat-square)](LICENSE)
 
 # Overview
 
