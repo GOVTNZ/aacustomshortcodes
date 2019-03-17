@@ -1,0 +1,6 @@
+---
+Name: govtnz-shortcodes
+---
+SilverStripe\Core\Injector\Injector:
+  'SilverStripe\View\Parsers\ShortcodeParser':
+    class: 'GovtNZ\SilverStripe\Parsers\ShortcodeParser'

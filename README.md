@@ -1,3 +1,9 @@
+# Govt.NZ Shortcode Parser
+
+[![Build Status](http://img.shields.io/travis/govtnz/aacustomshortcodes.svg?style=flat-square)](http://travis-ci.org/govtnz/aacustomshortcodes)
+[![Version](http://img.shields.io/packagist/v/govtnz/aacustomshortcodes.svg?style=flat-square)](https://packagist.org/packages/govtnz/aacustomshortcodes)
+[![License](http://img.shields.io/packagist/l/govtnz/aacustomshortcodes.svg?style=flat-square)](LICENSE.md)
+
 # Overview
 
 This module is a transitional implementation of short code handling. It uses the dependency
@@ -12,8 +18,6 @@ It is also designed to be a drop-in replacement for the standard parser and to b
 existing framework and CMS shortcodes, and other shortcodes you may have. You can get additional
 behaviours by augmenting the shortcode registration. It uses identical regexes for detecting shortcodes in
 text and attributes, and passes all framework short code tests.
-
-This has been tested on SilverStripe 3.2.3.
 
 # Installation
 

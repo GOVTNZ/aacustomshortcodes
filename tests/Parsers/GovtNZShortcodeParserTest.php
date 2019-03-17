@@ -1,15 +1,19 @@
 <?php
 
+namespace GovtNZ\SilverStripe\Tests\Parsers;
+
+use SilverStripe\Dev\SapphireTest;
+
 /**
  * Unit tests for GOVT NZ custom shortcode parser, which derives from shortcode parser but extends it
  * with extra behaviour.
  *
  */
 class GovtNZShortcodeParserTest extends SapphireTest {
-	
+
 	protected $arguments, $contents, $tagName, $parser;
 	protected $extra = array();
-	
+
 	public function setUp() {
 		// ShortcodeParser::get('test')->register('test_shortcode', array($this, 'shortcodeSaver'));
 

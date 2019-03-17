@@ -1,17 +1,36 @@
 {
-	"name": "GOVTNZ/aacustomshortcodes",
-	"description": "A drop-in replacement for shortcode parser, providing nested shortcodes",
-	"type": "silverstripe-module",
-	"homepage": "http://github.com/GOVTNZ/aacustomshortcodes",
-	"keywords": ["silverstripe", "shortcodes"],
-	"license": "BSD-3-Clause",
-	"authors": [
-		{
-			"name": "Mark Stephens",
-			"email": "mr.morphic@gmail.com"
-		}
-	],
-	"require": {
-		"silverstripe/framework": "*"
-	}
+    "name": "GOVTNZ/aacustomshortcodes",
+    "description": "A drop-in replacement for shortcode parser, providing nested shortcodes",
+    "type": "silverstripe-vendormodule",
+    "homepage": "http://github.com/GOVTNZ/aacustomshortcodes",
+    "keywords": ["silverstripe", "shortcodes"],
+    "license": "MIT License",
+    "authors": [{
+      "name": "Govt.nz",
+      "email": "govtnz@dia.govt.nz"
+    }],
+    "require": {
+        "silverstripe/framework": "^4"
+    },
+    "autoload": {
+        "psr-4": {
+            "GovtNZ\\SilverStripe\\Parsers\\": "src/Parsers",
+            "GovtNZ\\SilverStripe\\Tests\\Parsers": "tests/Parsers"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7",
+        "squizlabs/php_codesniffer": "^3.4"
+    },
+    "scripts": {
+        "remove-uses": "php-cs-fixer fix src/ --rules=no_unused_imports",
+        "lint": "phpcs --extensions=php src/",
+        "syntax-check": "find src/",
+        "lint-clean": "phpcbf src/"
+    },
+    "extra": {
+      "branch-alias": {
+        "dev-master": "2.x-dev"
+      }
+    }
 }

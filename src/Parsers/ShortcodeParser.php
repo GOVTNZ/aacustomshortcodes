@@ -1,16 +1,26 @@
 <?php
 
-/** GovtNZShortcodeParser is a replacement for ShortcodeParser. It provides all of shortcode parser's
- ** behaviours, but also handles certain cases. Specifically, this handles the concept of a shortcode
- ** that is to be treated as if it returns a block element. TinyMCE doesn't understand the shortcodes
- ** so puts <p> around them, and this parser will reduce them. It also understands nested shortcodes.
- **/
-class GovtNZShortcodeParser extends ShortcodeParser
-{
+namespace GovtNZ\SilverStripe\Parsers;
 
+use SilverStripe\View\Parsers\ShortcodeParser;
+use SilverStripe\Dev\Debug;
+
+/**
+ * GovtNZShortcodeParser is a replacement for ShortcodeParser. It provides all
+ * of shortcode parser's behaviours, but also handles certain cases.
+ * Specifically, this handles the concept of a shortcode that is to be treated
+ * as if it returns a block element. TinyMCE doesn't understand the shortcodes
+ * so puts <p> around them, and this parser will reduce them. It also
+ * understands nested shortcodes.
+ */
+class ShortcodeParser extends ShortcodeParser
+{
     public static $RESULT_TEXT = 'text';
+
     public static $RESULT_INLINE = 'inline';
+
     public static $RESULT_BLOCK = 'block';
+
     public static $RESULT_MIXED = 'mixed';
 
     protected static $debugging = false;
@@ -18,8 +28,6 @@ class GovtNZShortcodeParser extends ShortcodeParser
     protected static $instances = array();
 
     protected static $active_instance = 'default';
-
-    // --------------------------------------------------------------------------------------------------------------
 
     // All shortcodes, including legacy shortcodes, are added here.	Indexed by shortcode name, and mapping
     // to the handler.
@@ -185,7 +193,7 @@ class GovtNZShortcodeParser extends ShortcodeParser
     );
 
     protected static $attrrx = '
-		([^\s\/\'"=,]+)       # Name  
+		([^\s\/\'"=,]+)       # Name
 		\s* = \s*
 		(?:
 			(?:\'([^\']+)\') | # Value surrounded by \'
@@ -202,21 +210,21 @@ class GovtNZShortcodeParser extends ShortcodeParser
     protected static $tagrx = '
 		# HTML Tag
 		<(?<element>(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+)>
-		 
+
 		| # Opening tag
-		(?<oesc>\[?) 
-		\[ 
-			(?<open>\w+) 
+		(?<oesc>\[?)
+		\[
+			(?<open>\w+)
 			[\s,]*
-			(?<attrs> (?: %s [\s,]*)* ) 
-		\/?\] 
+			(?<attrs> (?: %s [\s,]*)* )
+		\/?\]
 		(?<cesc1>\]?)
-		 
+
 		| # Closing tag
-		\[\/ 
-			(?<close>\w+) 
-		\] 
-		(?<cesc2>\]?)  
+		\[\/
+			(?<close>\w+)
+		\]
+		(?<cesc2>\]?)
 ';
 
     protected static function tagrx()
