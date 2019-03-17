@@ -4,6 +4,7 @@ namespace GovtNZ\SilverStripe\Parsers;
 
 use SilverStripe\View\Parsers\ShortcodeParser as BaseParser;
 use SilverStripe\Dev\Debug;
+use SilverStripe\Core\Injector\Injector;
 
 /**
  * GovtNZShortcodeParser is a replacement for ShortcodeParser. It provides all
@@ -15,152 +16,12 @@ use SilverStripe\Dev\Debug;
  */
 class ShortcodeParser extends BaseParser
 {
-    public static $RESULT_TEXT = 'text';
 
-    public static $RESULT_INLINE = 'inline';
-
-    public static $RESULT_BLOCK = 'block';
-
-    public static $RESULT_MIXED = 'mixed';
+    protected $extraMetadata = [];
 
     protected static $debugging = false;
 
-    protected static $instances = array();
-
-    protected static $active_instance = 'default';
-
-    // All shortcodes, including legacy shortcodes, are added here.	Indexed by shortcode name, and mapping
-    // to the handler.
-    protected $shortcodes = array();
-
-    // Where shortcodes have optional extra metadata, that is stored here, indexed by shortcode name.
-    private $extraMetadata = array();
-
-    // --------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Get the {@link ShortcodeParser} instance that is attached to a particular identifier.
-     *
-     * @param string $identifier Defaults to "default".
-     * @return ShortcodeParser
-     */
-    public static function get($identifier = 'default')
-    {
-        if (!array_key_exists($identifier, self::$instances)) {
-            self::$instances[$identifier] = static::create();
-        }
-
-        return self::$instances[$identifier];
-    }
-
-    /**
-     * Get the currently active/default {@link ShortcodeParser} instance.
-     *
-     * @return ShortcodeParser
-     */
-    public static function get_active()
-    {
-        return static::get(self::$active_instance);
-    }
-
-    /**
-     * Set the identifier to use for the current active/default {@link ShortcodeParser} instance.
-     *
-     * @param string $identifier
-     */
-    public static function set_active($identifier)
-    {
-        self::$active_instance = (string)$identifier;
-    }
-
-    // --------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Register a shortcode, and attach it to a PHP callback.
-     *
-     * The callback for a shortcode will have the following arguments passed to it:
-     *   - Any parameters attached to the shortcode as an associative array (keys are lower-case).
-     *   - Any content enclosed within the shortcode (if it is an enclosing shortcode). Note that any content within
-     *     this will not have been parsed, and can optionally be fed back into the parser.
-     *   - The {@link ShortcodeParser} instance used to parse the content.
-     *   - The shortcode tag name that was matched within the parsed content.
-     *   - An associative array of extra information about the shortcode being parsed.
-     *
-     * @param string $shortcode The shortcode tag to map to the callback - normally in lowercase_underscore format.
-     * @param callback $callback The callback to replace the shortcode with.
-     * @param map $options An optional map of options which is saved as extra metadata about the shortcode. For legacy
-     *                shortcodes, not providing this will cause the same behaviour as before. If provided, however,
-     *                it provides the parser more information about the intent and behaviour of the shortcode, such as
-     *                whether it expects a start and end, and what kind of content it generates. This can help the parser.
-     */
-    public function register($shortcode, $callback, $options = null)
-    {
-        if (!is_callable($callback)) {
-            return;
-        }
-
-        // Add the mapping of shortcode to callback
-        $this->shortcodes[$shortcode] = $callback;
-
-        // Save options, if provided. If NULL, don't record any. If provided default any missing.
-        if (!$options) {
-            return;
-        }
-
-        $defaultOptions = array(
-            'hasStartAndEnd' => false,
-            'expectedResult' => self::$RESULT_TEXT
-        );
-        $this->extraMetadata[$shortcode] = array_merge($defaultOptions, $options);
-    }
-
-    /**
-     * Check if a shortcode has been registered.
-     *
-     * @param string $shortcode
-     * @return bool
-     */
-    public function registered($shortcode)
-    {
-        return array_key_exists($shortcode, $this->shortcodes);
-    }
-
-    /**
-     * Remove a specific registered shortcode.
-     *
-     * @param string $shortcode
-     */
-    public function unregister($shortcode)
-    {
-        if ($this->registered($shortcode)) {
-            unset($this->shortcodes[$shortcode]);
-            unset($this->extraMetadata[$shortcode]);
-        }
-    }
-
-    /**
-     * Remove all registered shortcodes.
-     */
-    public function clear()
-    {
-        $this->shortcodes = array();
-    }
-
-    /**
-     * Call a shortcode and return its replacement text
-     * Returns false if the shortcode isn't registered
-     */
-    public function callShortcode($tag, $attributes, $content, $extra = array())
-    {
-        if (!$tag || !isset($this->shortcodes[$tag])) {
-            return false;
-        }
-        return call_user_func($this->shortcodes[$tag], $attributes, $content, $this, $tag, $extra);
-    }
-
-    protected static $marker_class = '--ss-shortcode-marker';
-
-    protected static $block_level_elements = array(
+    protected static $block_level_elements = [
         'address',
         'article',
         'aside',
@@ -190,57 +51,13 @@ class ShortcodeParser extends BaseParser
         'section',
         'table',
         'ul'
-    );
+    ];
 
-    protected static $attrrx = '
-		([^\s\/\'"=,]+)       # Name
-		\s* = \s*
-		(?:
-			(?:\'([^\']+)\') | # Value surrounded by \'
-			(?:"([^"]+)")    | # Value surrounded by "
-			([^\s,\]]+)          # Bare value
-		)
-';
-
-    protected static function attrrx()
-    {
-        return '/' . self::$attrrx . '/xS';
-    }
-
-    protected static $tagrx = '
-		# HTML Tag
-		<(?<element>(?:"[^"]*"[\'"]*|\'[^\']*\'[\'"]*|[^\'">])+)>
-
-		| # Opening tag
-		(?<oesc>\[?)
-		\[
-			(?<open>\w+)
-			[\s,]*
-			(?<attrs> (?: %s [\s,]*)* )
-		\/?\]
-		(?<cesc1>\]?)
-
-		| # Closing tag
-		\[\/
-			(?<close>\w+)
-		\]
-		(?<cesc2>\]?)
-';
-
-    protected static function tagrx()
-    {
-        return '/' . sprintf(self::$tagrx, self::$attrrx) . '/xS';
-    }
-
-    const WARN = 'warn';
-    const STRIP = 'strip';
-    const LEAVE = 'leave';
-    const ERROR = 'error';
-
-    // public static $error_behavior = self::LEAVE;
-
-    // Parse shortcodes in the content. This first handles substitution of any custom elements,
-    // and then delegates to the default parsing method to handle short codes.
+    /**
+     * Parse shortcodes in the content. This first handles substitution of any
+     * custom elements, and then delegates to the default parsing method to
+     * handle short codes.
+     */
     public function parse($content)
     {
         // LH 20170227 If $content contains table elements <tr> or <td> within a <script> tag, we don't parse it.
@@ -431,7 +248,7 @@ class ShortcodeParser extends BaseParser
      * @return array - The list of tags found. When using an open/close pair, only one item will be in the array,
      * with "content" set to the text between the tags
      */
-    protected function extractTags($content)
+    public function extractTags($content)
     {
         $tags = array();
         $tagIndex = 0;
@@ -924,11 +741,6 @@ class ShortcodeParser extends BaseParser
         return $content;
     }
 
-    const BEFORE = 'before';
-    const AFTER = 'after';
-    const SPLIT = 'split';
-    const INLINE = 'inline';
-
     /**
      * Given a node with represents a shortcode marker and a location string, mutates the DOM to put the
      * marker in the compliant location
@@ -1037,39 +849,4 @@ class ShortcodeParser extends BaseParser
 
         return $content;
     }
-
-    protected function removeNode($node)
-    {
-        $node->parentNode->removeChild($node);
-    }
-
-    protected function insertAfter($new, $after)
-    {
-        $parent = $after->parentNode;
-        $next = $after->nextSibling;
-
-        if ($next) {
-            $parent->insertBefore($new, $next);
-        } else {
-            $parent->appendChild($new);
-        }
-    }
-
-    protected function insertListAfter($new, $after)
-    {
-        $doc = $after->ownerDocument;
-        $parent = $after->parentNode;
-        $next = $after->nextSibling;
-
-        for ($i = 0; $i < $new->length; $i++) {
-            $imported = $doc->importNode($new->item($i), true);
-
-            if ($next) {
-                $parent->insertBefore($imported, $next);
-            } else {
-                $parent->appendChild($imported);
-            }
-        }
-    }
-
 }
