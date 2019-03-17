@@ -15,7 +15,7 @@
     "autoload": {
         "psr-4": {
             "GovtNZ\\SilverStripe\\Parsers\\": "src/Parsers",
-            "GovtNZ\\SilverStripe\\Tests\\Parsers": "tests/Parsers"
+            "GovtNZ\\SilverStripe\\Tests\\Parsers\\": "tests/Parsers"
         }
     },
     "require-dev": {
