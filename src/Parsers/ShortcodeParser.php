@@ -5,6 +5,7 @@ namespace GovtNZ\SilverStripe\Parsers;
 use SilverStripe\View\Parsers\ShortcodeParser as BaseParser;
 use SilverStripe\Dev\Debug;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\View\Parsers\HTMLValue;
 
 /**
  * GovtNZShortcodeParser is a replacement for ShortcodeParser. It provides all
@@ -16,6 +17,13 @@ use SilverStripe\Core\Injector\Injector;
  */
 class ShortcodeParser extends BaseParser
 {
+    public static $RESULT_TEXT = 'text';
+
+    public static $RESULT_INLINE = 'inline';
+
+    public static $RESULT_BLOCK = 'block';
+
+    public static $RESULT_MIXED = 'mixed';
 
     protected $extraMetadata = [];
 
@@ -52,6 +60,30 @@ class ShortcodeParser extends BaseParser
         'table',
         'ul'
     ];
+
+    public function register($shortcode, $callback, $options = null)
+    {
+        if (!is_callable($callback)) {
+            return;
+        }
+
+        // Add the mapping of shortcode to callback
+        $this->shortcodes[$shortcode] = $callback;
+
+        // Save options, if provided. If NULL, don't record any. If provided default any missing.
+        if (!$options) {
+            return $this;
+        }
+
+        $defaultOptions = array(
+            'hasStartAndEnd' => false,
+            'expectedResult' => self::$RESULT_TEXT
+        );
+
+        $this->extraMetadata[$shortcode] = array_merge($defaultOptions, $options);
+
+        return $this;
+    }
 
     /**
      * Parse shortcodes in the content. This first handles substitution of any
@@ -104,7 +136,7 @@ class ShortcodeParser extends BaseParser
         // opening tags that is used to process in the correct order.
         list($content, $tags, $ordered) = $this->extractTags($content);
 
-        $htmlvalue = Injector::inst()->create('HTMLValue', $content);
+        $htmlvalue = Injector::inst()->create(HTMLValue::class, $content);
 
         // Now parse the result into a DOM
         if (!$htmlvalue->isValid()) {
