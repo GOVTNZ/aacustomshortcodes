@@ -6,13 +6,15 @@ use SilverStripe\Dev\SapphireTest;
 use SilverStripe\View\Parsers\ShortcodeParser;
 use GovtNZ\SilverStripe\Parsers\ShortcodeParser as GovtNZShortcodeParser;
 
-class GovtNZShortcodeParserTest extends SapphireTest {
+class GovtNZShortcodeParserTest extends SapphireTest
+{
 
     protected $arguments, $contents, $tagName, $parser;
 
     protected $extra = array();
 
-    public function setUp() {
+    public function setUp()
+    {
         $this->parser = ShortcodeParser::get('test');
 
         $this->parser->register(
@@ -58,7 +60,8 @@ class GovtNZShortcodeParserTest extends SapphireTest {
         parent::setUp();
     }
 
-    public function testStrippingNestedBlockShortcode() {
+    public function testStrippingNestedBlockShortcode()
+    {
         // Check no substitution case, with <p> tags
         $this->assertEquals(
             '<p>no shortcode</p>',
@@ -90,7 +93,8 @@ class GovtNZShortcodeParserTest extends SapphireTest {
         );
     }
 
-    public function testNesting() {
+    public function testNesting()
+    {
         $this->assertEquals(
             '<div>before<div>#2foo</div></div>',
             $this->parser->parse('[testblocknested]before[testblocksecond]foo[/testblocksecond][/testblocknested]')
@@ -117,7 +121,8 @@ class GovtNZShortcodeParserTest extends SapphireTest {
         );
     }
 
-    public function testInlineSingleShortcode() {
+    public function testInlineSingleShortcode()
+    {
         $this->assertEquals(
             "<p><span>testinlinesingle</span></p>",
             $this->parser->parse("<p>[testinlinesingle]</p>")

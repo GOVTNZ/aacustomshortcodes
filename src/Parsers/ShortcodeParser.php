@@ -202,8 +202,10 @@ class ShortcodeParser extends BaseParser
 
             if (!$parent) {
                 if ($location !== self::INLINE) {
-                    user_error("Parent block for shortcode couldn't be found, but location wasn't INLINE",
-                        E_USER_ERROR);
+                    user_error(
+                        "Parent block for shortcode couldn't be found, but location wasn't INLINE",
+                        E_USER_ERROR
+                    );
                 }
             } else {
                 $this->moveMarkerToCompliantHome($shortcodeNode, $parent, $location);
@@ -224,8 +226,8 @@ class ShortcodeParser extends BaseParser
         // Clean up any marker classes left over, for example, those injected into <script> tags
         $parser = $this;
         $content = preg_replace_callback(
-        // Not a general-case parser; assumes that the HTML generated in replaceElementTagsWithMarkers()
-        // hasn't been heavily modified
+            // Not a general-case parser; assumes that the HTML generated in replaceElementTagsWithMarkers()
+            // hasn't been heavily modified
             '/<span[^>]+class="' . preg_quote(self::$marker_class) . '"[^>]+data-tagid="([^"]+)"[^>]+>/i',
             function ($matches) use ($tags, $parser) {
                 $tag = $tags[$matches[1]];
@@ -239,7 +241,7 @@ class ShortcodeParser extends BaseParser
 
     /**
      * @param $content
-     * @return bool
+     * @return boolean
      * Returns TRUE if the content contains table fragments within a script tag and without an enclosing table.
      * Written specifically for gridfieldextensions' GridFieldAddNewInlineRow, but will work for other static template
      * instances. This is a nasty hack, but we have two conflicting dynamics at work; the injection of script blocks
@@ -362,8 +364,6 @@ class ShortcodeParser extends BaseParser
                     } else {
                         $markerTag = 'span';
                     }
-
-
                 }
 
                 $tag['registered'] = $registered;
@@ -505,15 +505,19 @@ class ShortcodeParser extends BaseParser
                     if (count($stack) == 0) {
                         // if an end tag appears by itself, it's an error unless it's not registered, where we'll ignore it.
                         if ($this->registered($tag['close'])) {
-                            $this->handleError("didn't expect close of " . $tag['close'],
-                                $tags[$i]); // $tags[$i] rather than $tag, because we change it.
+                            $this->handleError(
+                                "didn't expect close of " . $tag['close'],
+                                $tags[$i]
+                            ); // $tags[$i] rather than $tag, because we change it.
                             $orderedTags[] = $tag;
                         }
                     } else {
                         $stackTop = $stack[count($stack) - 1];
                         if ($stackTop['open'] != $tag['close']) {
-                            $this->handleError("mismatching end shortcode, expected " . $stackTop['open'] . " but got " . $tag['close'],
-                                $tags[$i]);
+                            $this->handleError(
+                                "mismatching end shortcode, expected " . $stackTop['open'] . " but got " . $tag['close'],
+                                $tags[$i]
+                            );
                         } else {
                             // the close matches what's on the stack, so pop it off and add it to orderedtags.
                             $orderedTags[] = $stackTop;
@@ -589,7 +593,6 @@ class ShortcodeParser extends BaseParser
                                             '<' . $markerTag . ' class="' . $markerClass . '" data-tagid="' . $tag['index'] . '">' .
                                             '</' . $markerTag . '>' .
                                             substr($content, $tag['e']);
-
                                     }
                                 }
                             }
@@ -621,7 +624,7 @@ class ShortcodeParser extends BaseParser
      * sha1(str)ortcode handler & replace the marker with the actual content
      *
      * @param DOMElement $node
-     * @param array $tag
+     * @param array      $tag
      */
     protected function replaceMarkerWithContent($node, $tag)
     {
@@ -693,7 +696,7 @@ class ShortcodeParser extends BaseParser
      * we can parse the resulting string as HTML and easily mutate the shortcodes in the DOM
      *
      * @param string $content - The HTML string with [tag] style shortcodes embedded
-     * @param array $tags - The tags extracted by extractTags
+     * @param array  $tags    - The tags extracted by extractTags
      * @return string - The HTML string with [tag] style shortcodes replaced by markers
      */
     protected function replaceTagsWithText($content, $tags, $generator)
@@ -746,7 +749,9 @@ class ShortcodeParser extends BaseParser
             $extra = array('node' => $node, 'element' => $node->ownerElement);
 
             if ($tags) {
-                $node->nodeValue = $this->replaceTagsWithText($node->nodeValue, $tags,
+                $node->nodeValue = $this->replaceTagsWithText(
+                    $node->nodeValue,
+                    $tags,
                     function ($idx, $tag) use ($parser, $extra) {
                         return $parser->getShortcodeReplacementText($tag, $extra, false);
                     }
@@ -796,7 +801,7 @@ class ShortcodeParser extends BaseParser
      * generate only inline blocks)
      *
      * @param DOMElement $node
-     * @param int $location - self::BEFORE, self::SPLIT or self::INLINE
+     * @param integer    $location - self::BEFORE, self::SPLIT or self::INLINE
      */
     protected function moveMarkerToCompliantHome($node, $parent, $location)
     {
@@ -833,11 +838,11 @@ class ShortcodeParser extends BaseParser
                 else {
                     if ($location == self::INLINE) {
                         // if(in_array(strtolower($node->tagName), self::$block_level_elements)) {
-                        // 	user_error(
-                        // 		'Requested to insert block tag '.$node->tagName.
-                        // 		' inline - probably this will break HTML compliance',
-                        // 		E_USER_WARNING
-                        // 	);
+                        //  user_error(
+                        //      'Requested to insert block tag '.$node->tagName.
+                        //      ' inline - probably this will break HTML compliance',
+                        //      E_USER_WARNING
+                        //  );
                         // }
                         // NOP
                     } else {
