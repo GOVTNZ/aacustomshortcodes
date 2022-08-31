@@ -92,6 +92,12 @@ class ShortcodeParser extends BaseParser
      */
     public function parse($content)
     {
+        
+        // If no content, don't try and parse it
+        if (!trim((string) $content)) {
+            return $content;
+        }
+
         // LH 20170227 If $content contains table elements <tr> or <td> within a <script> tag, we don't parse it.
         // This avoids breaking static template fragments such as gridfieldextensions. The content we parse comes from
         // TinyMCE, and TinyMCE doesn't permit fragments of this nature.
@@ -118,11 +124,6 @@ class ShortcodeParser extends BaseParser
 
         // If no shortcodes defined, don't try and parse any
         if (!$this->shortcodes) {
-            return $content;
-        }
-
-        // If no content, don't try and parse it
-        if (!trim($content)) {
             return $content;
         }
 

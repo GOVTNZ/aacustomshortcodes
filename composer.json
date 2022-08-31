@@ -1,8 +1,8 @@
 {
-    "name": "GOVTNZ/aacustomshortcodes",
+    "name": "govtnz/aacustomshortcodes",
     "description": "A drop-in replacement for shortcode parser, providing nested shortcodes",
     "type": "silverstripe-vendormodule",
-    "homepage": "http://github.com/GOVTNZ/aacustomshortcodes",
+    "homepage": "http://github.com/govtnz/aacustomshortcodes",
     "keywords": ["silverstripe", "shortcodes"],
     "license": "MIT License",
     "authors": [{
