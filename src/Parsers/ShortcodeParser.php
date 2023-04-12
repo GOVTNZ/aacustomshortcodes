@@ -305,6 +305,7 @@ class ShortcodeParser extends BaseParser
                     preg_match_all(static::attrrx(), $match['attrs'][0], $attrmatches, PREG_SET_ORDER);
 
                     foreach ($attrmatches as $attr) {
+                        if ( count(array_values(array_filter($attr))) < 3 ) continue;
                         list($whole, $name, $value) = array_values(array_filter($attr));
                         $attrs[$name] = $value;
                     }
