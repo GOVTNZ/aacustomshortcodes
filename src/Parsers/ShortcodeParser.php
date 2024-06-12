@@ -640,9 +640,12 @@ class ShortcodeParser extends BaseParser
             if ($body) {
                 $this->insertListAfter($body->childNodes, $node);
             }
+
+            $this->removeNode($node);
         }
 
-        $this->removeNode($node);
+        return false;
+        
     }
 
     /**
