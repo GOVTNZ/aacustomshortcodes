@@ -635,7 +635,7 @@ class ShortcodeParser extends BaseParser
             Debug::show('replacing marker content with ' . print_r($content, true));
         }
         if ($content) {
-            $parsed = Injector::inst()->create('HTMLValue', $content);
+            $parsed = Injector::inst()->create(HTMLValue::class, $content);
             $body = $parsed->getBody();
             if ($body) {
                 $this->insertListAfter($body->childNodes, $node);
