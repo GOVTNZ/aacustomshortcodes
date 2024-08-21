@@ -19,8 +19,8 @@ class GovtNZShortcodeParserTest extends SapphireTest
 
         $this->parser->register(
             'testblocknested',
-            function ($arguments, $content = null, $parser = null, $tagName) {
-                return "<div>" . $content . "</div>";
+            function ($arguments, $tagName, $contents = null, $parser = null) {
+                return "<div>" . $contents . "</div>";
             },
             array(
                 'hasStartAndEnd' => true,
@@ -30,8 +30,8 @@ class GovtNZShortcodeParserTest extends SapphireTest
 
         $this->parser->register(
             'testblocksecond',
-            function ($arguments, $content = null, $parser = null, $tagName) {
-                return "<div>#2" . $content . "</div>";
+            function ($arguments, $tagName, $contents = null, $parser = null) {
+                return "<div>#2" . $contents . "</div>";
             },
             array(
                 'hasStartAndEnd' => true,
@@ -41,7 +41,7 @@ class GovtNZShortcodeParserTest extends SapphireTest
 
         $this->parser->register(
             'testinlinesingle',
-            function ($arguments, $content = null, $parser = null, $tagName) {
+            function ($arguments, $tagName, $contents = null, $parser = null) {
                 return "<span>testinlinesingle</span>";
             },
             array(
@@ -52,7 +52,7 @@ class GovtNZShortcodeParserTest extends SapphireTest
 
         $this->parser->register(
             'legacy',
-            function ($arguments, $content = null, $parser = null, $tagName) {
+            function ($arguments, $tagName, $contents = null, $parser = null) {
                 return "<span>legacy</span>";
             }
         );
