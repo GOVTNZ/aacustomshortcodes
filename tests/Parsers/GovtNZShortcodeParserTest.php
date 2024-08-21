@@ -13,7 +13,7 @@ class GovtNZShortcodeParserTest extends SapphireTest
 
     protected $extra = array();
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->parser = ShortcodeParser::get('test');
 
